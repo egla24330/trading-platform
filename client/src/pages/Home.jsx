@@ -12,16 +12,12 @@ import VerifyAccountModal from '../components/VerifyAccountModal'
 
 const Home = () => {
   const { isLogin,userData } = useAuth();
-  console.log("isLogin on home page:", isLogin);
   // const [verifyOpen, setVerifyOpen] = useState(true);
 
   const verifyOpen = isLogin && userData && !userData.isAccountVerified;
-  console.log("verifyOpen on home page:", verifyOpen);
-  console.log("userData on home page:", userData);
-  console.log("isAccountVerified on home page:", userData ? userData.isAccountVerified : 'N/A');
 
   return (
-    <div className="bg-gray-900">
+    <div className="bg-gray-900 mb-20">
       <Header />
       <Hero />
       <CoinList />

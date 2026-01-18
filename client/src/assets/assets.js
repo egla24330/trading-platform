@@ -14,8 +14,11 @@ import telegram from './telegram.png';
 import binancecoin from './binance.svg';
 import dogecoin from './dogs.svg';
 import ripple from './xrp.svg';
+import hero from './hero.jpg';
+
 
 export const assets = {
+    hero,
     bitcoin,
     ethereum,
     xrp,

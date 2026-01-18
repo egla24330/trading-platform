@@ -36,14 +36,14 @@ export default function CoinCard({ name, symbol, price, change, onClick }) {
 
             whileHover={{ scale: 1.01 }}
             transition={{ duration: 0.2 }}
-            className="rounded-xl overflow-hidden p-3 max-w-2xl m-auto cursor-pointer"
+            className="rounded-xl overflow-hidden sm:p-3 max-w-2xl m-auto cursor-pointer"
         >
 
 
             <Card className=" text-white border  border-gray-50">
                 <div
                     onClick={() => onClick()}
-                    className={`p-4 flex items-center justify-between rounded-xl border border-gray-800 bg-gray-900 shadow-sm ${name === 'Loading...' ? 'animate-pulse' : ''}`}>
+                    className={`px-3 py-4 flex items-center justify-between rounded-xl border border-gray-800 bg-gray-900 shadow-sm ${name === 'Loading...' ? 'animate-pulse' : ''}`}>
                     <div onClick={onClick} className="flex items-center gap-3">
                         {name !== 'Loading...' && (
                             <img src={icon} alt={name} className="w-8 h-8" />
