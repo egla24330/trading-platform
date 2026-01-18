@@ -44,7 +44,7 @@ function Tab({ icon, label, active, onClick }) {
       onClick={onClick}
       className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-all duration-300 ${
         active 
-          ? "text-blue-400 bg-blue-500/10 border border-blue-500/20" 
+          ? "text-blue-400 bg-blue-500/10 border" 
           : "text-gray-400 hover:text-white hover:bg-gray-700/50"
       }`}
     >

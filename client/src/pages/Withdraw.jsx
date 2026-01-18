@@ -286,7 +286,7 @@ export default function WithdrawPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black py-4 px-4 mb-20">
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black py-4 px-1.5 sm:px-4 mb-20">
             <MobileNav />
 
             <ConfirmationModal
