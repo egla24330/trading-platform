@@ -1,0 +1,196 @@
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+
+const KYCSchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
+  idType: { 
+    type: String, 
+    required: true,
+    enum: ["passport", "national_id", "drivers_license", "other"]
+  },
+  idNumber: { type: String },
+  idFrontImage: { type: String, required: true },
+  idBackImage: { type: String },
+  selfieImage: { type: String },
+  submittedAt: { type: Date, default: Date.now },
+  reviewedAt: { type: Date },
+  reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  rejectionReason: { type: String }
+});
+
+const userSchema = new mongoose.Schema(
+  {
+    googleId: { type: String, unique: true, sparse: true },
+    telegramId: { type: String, unique: true, sparse: true },
+    name: { type: String, required: true },
+    userName: { type: String, unique: true, sparse: true },
+    email: { type: String, required: true, unique: true },
+    phone: { type: String },
+    avatar: { type: String },
+    password: { type: String },
+    
+    // Verification
+    verifyOtp: { type: String, default: "" },
+    verifyOtpExpireAt: { type: Number, default: 0 },
+    isAccountVerified: { type: Boolean, default: false },
+    isEmailVerified: { type: Boolean, default: false },
+    isPhoneVerified: { type: Boolean, default: false },
+    
+    // KYC
+    kycStatus: {
+      type: String,
+      enum: ["not_submitted", "pending", "under_review", "approved", "rejected"],
+      default: "not_submitted",
+    },
+    kyc: { type: KYCSchema, default: null },
+    
+    // Account Status
+    isBlocked: { type: Boolean, default: false },
+    forceWin: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
+    lastLogin: { type: Date },
+    
+    // Password reset
+    resetOtp: { type: String, default: "" },
+    resetOtpExpireAt: { type: Number, default: 0 },
+    
+    // Role & Permissions
+    role: { type: String, enum: ["user", "admin", "moderator"], default: "user" },
+    permissions: [{ type: String }],
+    
+    // Wallet / Balance
+    wallet: {
+      usdt: { type: Number, default: 0 },
+      btc: { type: Number, default: 0 },
+      eth: { type: Number, default: 0 },
+      loanUsdt: { type: Number, default: 0 },
+    },
+    
+    // Loan Management
+    loanStatus: {
+      type: String,
+      enum: ["no_active_loan", "active", "overdue", "pending", "rejected", "paid"],
+      default: "no_active_loan"
+    },
+    loanHistory: [{
+      amount: Number,
+      interestRate: Number,
+      term: Number,
+      status: String,
+      disbursedAt: Date,
+      dueDate: Date,
+      paidAt: Date
+    }],
+    
+    // Trading Settings
+    tradingEnabled: { type: Boolean, default: true },
+    maxTradeAmount: { type: Number, default: 1000 },
+    riskLevel: { type: String, enum: ["low", "medium", "high"], default: "medium" },
+    
+    // Statistics
+    totalTrades: { type: Number, default: 0 },
+    winRate: { type: Number, default: 0 },
+    totalProfit: { type: Number, default: 0 },
+    totalLoss: { type: Number, default: 0 },
+    
+    // Security
+    twoFactorEnabled: { type: Boolean, default: false },
+    twoFactorSecret: { type: String },
+    loginAttempts: { type: Number, default: 0 },
+    lockUntil: { type: Date },
+    
+    // Referral System
+    referralCode: { type: String, unique: true },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    referrals: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    referralEarnings: { type: Number, default: 0 },
+    
+    // Metadata
+    ipAddress: { type: String },
+    userAgent: { type: String },
+    country: { type: String },
+    timezone: { type: String, default: "UTC" },
+    language: { type: String, default: "en" },
+    
+    // Custom ID for frontend (like AJ39XK1P)
+    userId: { type: String, unique: true },
+    
+    // Soft delete
+    deletedAt: { type: Date },
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  },
+  { 
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
+);
+
+// Virtual for total balance in USD
+userSchema.virtual('totalBalanceUSD').get(function() {
+  const btcRate = 50000; // Example rate, should come from API
+  const ethRate = 3000; // Example rate
+  return (this.wallet.usdt || 0) + 
+         (this.wallet.btc || 0) * btcRate + 
+         (this.wallet.eth || 0) * ethRate;
+});
+
+// Virtual for display name
+userSchema.virtual('displayName').get(function() {
+  return this.name || this.userName || this.email.split('@')[0];
+});
+
+// Pre-save middleware
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Generate unique user ID
+userSchema.pre('save', async function(next) {
+  if (!this.userId) {
+    this.userId = 'U' + Math.random().toString(36).substr(2, 9).toUpperCase();
+  }
+  next();
+});
+
+// Generate referral code
+userSchema.pre('save', async function(next) {
+  if (!this.referralCode) {
+    this.referralCode = 'REF' + Math.random().toString(36).substr(2, 6).toUpperCase();
+  }
+  next();
+});
+
+// Method to check password
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Method to get public profile
+userSchema.methods.toPublicJSON = function() {
+  const obj = this.toObject();
+  delete obj.password;
+  delete obj.twoFactorSecret;
+  delete obj.verifyOtp;
+  delete obj.resetOtp;
+  delete obj.loginAttempts;
+  delete obj.lockUntil;
+  return obj;
+};
+
+// Method to check if account is locked
+userSchema.methods.isLocked = function() {
+  return this.lockUntil && this.lockUntil > Date.now();
+};
+
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
+export default User;
