@@ -5,6 +5,7 @@ import { Routes, Route } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import { useAuth } from './context/AuthContext.jsx';
 import Loading from './components/Loading.jsx';
+import Tawk from './components/Tawk.jsx';
 const Home = lazy(() => import("./pages/Home"));
 const About = lazy(() => import("./pages/About"));
 const CoinDetail = lazy(() => import("./pages/CoinDetail"));
@@ -37,6 +38,7 @@ const App = () => {
   return (
     <div>
       <ToastContainer />
+           <Tawk /> 
       <Suspense fallback={<Loading text="Please wait..." />}>
         <Routes>
           <Route path="/" element={<Home />} />
