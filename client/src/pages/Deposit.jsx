@@ -473,7 +473,7 @@ export default function Deposit() {
                             {/* <AlertCircle className="h-5 w-5 text-yellow-400 mt-0.5 flex-shrink-0" /> */}
                             <div>
                                 <h3 className="font-medium text-yellow-400 mb-1">KYC Verification Required</h3>
-                                <p className="text-yellow-300/80 text-text-xs sm:text-sm">
+                                <p className="text-yellow-300/80 text-xs sm:text-sm">
                                     Please complete KYC verification before making deposits.
                                     <button
                                         onClick={() => navigate('/kyc')}
@@ -520,7 +520,7 @@ export default function Deposit() {
                 )}
 
                 {/* Main Card */}
-                <div className="sm:bg-gray-800/50 sm:backdrop-blur-lg rounded-2xl sm:border sm:border-gray-700/50 sm:p-4 shadow-2xl">
+                <div className="sm:bg-gray-800/50 sm:backdrop-blur-lg rounded-2xl sm:border sm:border-gray-700/50 p-2 sm:p-4 shadow-2xl">
                     <h1 className="text-xl font-bold text-white mb-2 text-center">Make a Deposit</h1>
                     <p className="text-gray-400 text-sm text-center mb-6">Send cryptocurrency to your wallet</p>
 
